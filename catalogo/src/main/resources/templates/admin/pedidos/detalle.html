@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pedido</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 1rem; max-width: 760px; margin-inline: auto; }
+        .tabla { overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; white-space: nowrap; }
+        .ok { background: #e6f4ea; padding: .5rem 1rem; border-radius: 6px; }
+        .total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<h1 th:text="'Pedido #' + ${pedido.id}">Pedido</h1>
+<p><a th:href="@{/admin/pedidos/nuevo}">+ Cargar otro pedido</a> · <a th:href="@{/admin}">Panel</a></p>
+<p class="ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+
+<p>
+    <strong th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">fecha</strong>
+    · Estado: <strong th:text="${pedido.estado}">estado</strong>
+    · Origen: <span th:text="${pedido.origen}">origen</span>
+</p>
+<p>
+    Cliente: <strong th:text="${pedido.clienteNombre}">cliente</strong><br>
+    Teléfono: <span th:text="${pedido.clienteTelefono}">tel</span><br>
+    <span th:if="${pedido.clienteEmail}">Email: <span th:text="${pedido.clienteEmail}"></span><br></span>
+    <span th:if="${pedido.nota}">Nota: <span th:text="${pedido.nota}"></span></span>
+</p>
+
+<div class="tabla">
+    <table>
+        <thead><tr><th>Producto</th><th>Talle</th><th>Color</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
+        <tbody>
+        <tr th:each="i : ${pedido.items}">
+            <td th:text="${i.productoNombre}">Producto</td>
+            <td th:text="${i.talle}">M</td>
+            <td th:text="${i.color.isBlank()} ? '—' : ${i.color}">Negro</td>
+            <td th:text="${i.cantidad}">1</td>
+            <td th:text="'$ ' + ${#numbers.formatDecimal(i.precioUnitario, 1, 'POINT', 2, 'COMMA')}">$ 0</td>
+            <td th:text="'$ ' + ${#numbers.formatDecimal(i.subtotal, 1, 'POINT', 2, 'COMMA')}">$ 0</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<p class="total" th:text="'Total: $ ' + ${#numbers.formatDecimal(pedido.total, 1, 'POINT', 2, 'COMMA')}">Total</p>
+</body>
+</html>

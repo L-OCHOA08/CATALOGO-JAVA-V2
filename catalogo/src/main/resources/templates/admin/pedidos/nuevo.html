@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Nuevo pedido</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 1rem; max-width: 640px; margin-inline: auto; }
+        label { display: block; margin-top: 1rem; font-weight: 600; }
+        input, select, textarea { width: 100%; padding: .5rem; box-sizing: border-box; }
+        .fila { display: grid; grid-template-columns: 1fr 90px; gap: .5rem; margin-top: .5rem; }
+        .error { background: #fdecea; color: #b00020; padding: .5rem 1rem; border-radius: 6px; }
+        button { margin-top: 1rem; padding: .6rem 1.2rem; }
+    </style>
+</head>
+<body>
+<h1>Nuevo pedido</h1>
+<p><a th:href="@{/admin}">← Panel</a></p>
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<form th:action="@{/admin/pedidos/crear}" method="post">
+    <label for="clienteNombre">Nombre del cliente</label>
+    <input type="text" id="clienteNombre" name="clienteNombre" th:value="${clienteNombre}" maxlength="120" required>
+
+    <label for="clienteTelefono">Teléfono</label>
+    <input type="text" id="clienteTelefono" name="clienteTelefono" th:value="${clienteTelefono}" maxlength="40" required>
+
+    <label for="clienteEmail">Email (opcional)</label>
+    <input type="text" id="clienteEmail" name="clienteEmail" th:value="${clienteEmail}" maxlength="120">
+
+    <label for="nota">Nota (opcional)</label>
+    <textarea id="nota" name="nota" rows="2" maxlength="500" th:text="${nota}"></textarea>
+
+    <h3>Prendas</h3>
+    <div id="filas">
+        <div class="fila" th:each="f : ${filas}">
+            <select name="varianteId">
+                <option value="">-- Elegí una prenda --</option>
+                <option th:each="v : ${variantes}" th:value="${v.id}"
+                        th:selected="${f.varianteId == v.id.toString()}"
+                        th:text="${v.producto.nombre + ' · ' + v.talle + (v.color.isBlank() ? '' : ' · ' + v.color) + ' · stock ' + v.stock + ' · $ ' + v.producto.precio}">Prenda</option>
+            </select>
+            <input type="number" name="cantidad" min="1" th:value="${f.cantidad}">
+        </div>
+    </div>
+    <button type="button" id="mas">+ Agregar prenda</button>
+    <br>
+    <button type="submit">Crear pedido</button>
+</form>
+
+<script>
+    document.getElementById('mas').addEventListener('click', function () {
+        var filas = document.getElementById('filas');
+        var nueva = filas.firstElementChild.cloneNode(true);
+        nueva.querySelector('select').value = '';
+        nueva.querySelector('input').value = '1';
+        filas.appendChild(nueva);
+    });
+</script>
+</body>
+</html>
