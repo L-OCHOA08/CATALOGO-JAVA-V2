@@ -38,4 +38,13 @@ public interface VarianteRepository extends JpaRepository<Variante, Long> {
             + "where v.activo = true and p.activo = true and v.stock > 0 "
             + "order by p.nombre, v.talle, v.color")
     List<Variante> disponibles();
+
+    @Query("select v from Variante v join fetch v.producto p "
+            + "where v.activo = true and p.activo = true and v.stock <= :umbral "
+            + "order by v.stock asc, p.nombre, v.talle, v.color")
+    List<Variante> stockBajo(@Param("umbral") int umbral);
+
+    @Query("select count(v) from Variante v "
+            + "where v.activo = true and v.producto.activo = true and v.stock <= :umbral")
+    long contarStockBajo(@Param("umbral") int umbral);
 }

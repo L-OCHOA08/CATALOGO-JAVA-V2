@@ -1,11 +1,14 @@
 package com.dressurban.catalogo.controller;
 
+import com.dressurban.catalogo.model.EstadoPedido;
 import com.dressurban.catalogo.model.OrigenPedido;
 import com.dressurban.catalogo.model.Pedido;
 import com.dressurban.catalogo.repository.PedidoRepository;
 import com.dressurban.catalogo.repository.VarianteRepository;
 import com.dressurban.catalogo.service.PedidoService;
 import com.dressurban.catalogo.service.StockInsuficienteException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,7 +18,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/pedidos")
@@ -42,6 +47,25 @@ public class PedidoAdminController {
         this.pedidoService = pedidoService;
         this.pedidos = pedidos;
         this.variantes = variantes;
+    }
+
+    @GetMapping
+    public String lista(@RequestParam(required = false) String estado,
+                        @RequestParam(defaultValue = "0") int pagina, Model model) {
+        EstadoPedido filtro = parsearEstado(estado);
+        PageRequest pr = PageRequest.of(Math.max(pagina, 0), 20);
+        Page<Pedido> page = filtro == null
+                ? pedidos.findAllByOrderByFechaDescIdDesc(pr)
+                : pedidos.findByEstadoOrderByFechaDescIdDesc(filtro, pr);
+
+        Map<String, Long> conteos = new LinkedHashMap<>();
+        for (EstadoPedido e : EstadoPedido.values()) {
+            conteos.put(e.name(), pedidos.countByEstado(e));
+        }
+        model.addAttribute("pagina", page);
+        model.addAttribute("filtro", filtro == null ? "" : filtro.name());
+        model.addAttribute("conteos", conteos);
+        return "admin/pedidos/lista";
     }
 
     @GetMapping("/nuevo")
@@ -95,6 +119,36 @@ public class PedidoAdminController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         model.addAttribute("pedido", p);
         return "admin/pedidos/detalle";
+    }
+
+    @PostMapping("/{id}/estado")
+    public String cambiarEstado(@PathVariable Long id, @RequestParam String nuevo,
+                                Principal principal, RedirectAttributes ra) {
+        EstadoPedido destino = parsearEstado(nuevo);
+        if (destino == null) {
+            ra.addFlashAttribute("error", "Estado no válido");
+            return "redirect:/admin/pedidos/" + id;
+        }
+        try {
+            pedidoService.cambiarEstado(id, destino, principal.getName());
+            ra.addFlashAttribute("mensaje", destino == EstadoPedido.CANCELADO
+                    ? "Pedido cancelado y stock devuelto"
+                    : "Pedido actualizado: " + destino);
+        } catch (IllegalArgumentException | StockInsuficienteException ex) {
+            ra.addFlashAttribute("error", ex.getMessage());
+        }
+        return "redirect:/admin/pedidos/" + id;
+    }
+
+    private EstadoPedido parsearEstado(String texto) {
+        if (texto == null || texto.isBlank()) {
+            return null;
+        }
+        try {
+            return EstadoPedido.valueOf(texto.trim());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private String formulario(Model model, List<Fila> filas, String nombre, String telefono,

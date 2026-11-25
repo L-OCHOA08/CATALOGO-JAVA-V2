@@ -31,6 +31,13 @@
     <input type="number" id="precio" step="0.01" min="0" th:field="*{precio}">
     <div class="error" th:if="${#fields.hasErrors('precio')}" th:errors="*{precio}"></div>
 
+    <th:block th:if="${modulos.reportes}">
+        <label for="costo">Costo (opcional, para calcular la ganancia)</label>
+        <input type="number" id="costo" step="0.01" min="0" th:field="*{costo}">
+        <div class="error" th:if="${#fields.hasErrors('costo')}" th:errors="*{costo}"></div>
+    </th:block>
+    <input type="hidden" th:unless="${modulos.reportes}" th:field="*{costo}">
+
     <label for="categoriaId">Categoría</label>
     <select id="categoriaId" name="categoriaId">
         <option value="">-- Elegí una --</option>

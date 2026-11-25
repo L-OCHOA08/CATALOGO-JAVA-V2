@@ -10,13 +10,17 @@
         table { border-collapse: collapse; width: 100%; }
         th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; white-space: nowrap; }
         .ok { background: #e6f4ea; padding: .5rem 1rem; border-radius: 6px; }
+        .error { background: #fdecea; color: #b00020; padding: .5rem 1rem; border-radius: 6px; }
         .total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 1rem; }
+        .acciones form { display: inline; }
+        .acciones button { padding: .5rem 1rem; margin-right: .5rem; }
     </style>
 </head>
 <body>
 <h1 th:text="'Pedido #' + ${pedido.id}">Pedido</h1>
-<p><a th:href="@{/admin/pedidos/nuevo}">+ Cargar otro pedido</a> · <a th:href="@{/admin}">Panel</a></p>
+<p><a th:href="@{/admin/pedidos}">← Pedidos</a> · <a th:href="@{/admin/pedidos/nuevo}">+ Cargar otro pedido</a></p>
 <p class="ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+<p class="error" th:if="${error}" th:text="${error}"></p>
 
 <p>
     <strong th:text="${#temporals.format(pedido.fecha, 'dd/MM/yyyy HH:mm')}">fecha</strong>
@@ -29,6 +33,28 @@
     <span th:if="${pedido.clienteEmail}">Email: <span th:text="${pedido.clienteEmail}"></span><br></span>
     <span th:if="${pedido.nota}">Nota: <span th:text="${pedido.nota}"></span></span>
 </p>
+
+<p th:if="${pedido.estado.name() == 'PENDIENTE' and vencimientoHoras > 0}"
+   th:text="'Se cancela automáticamente el ' + ${#temporals.format(pedido.fecha.plusHours(vencimientoHoras), 'dd/MM/yyyy HH:mm')} + ' si no lo confirmás antes.'"></p>
+
+<div class="acciones">
+    <form th:if="${pedido.estado.name() == 'PENDIENTE'}"
+          th:action="@{/admin/pedidos/{id}/estado(id=${pedido.id})}" method="post">
+        <input type="hidden" name="nuevo" value="CONFIRMADO">
+        <button type="submit">Confirmar pedido</button>
+    </form>
+    <form th:if="${pedido.estado.name() == 'CONFIRMADO'}"
+          th:action="@{/admin/pedidos/{id}/estado(id=${pedido.id})}" method="post">
+        <input type="hidden" name="nuevo" value="ENTREGADO">
+        <button type="submit">Marcar como entregado</button>
+    </form>
+    <form th:if="${pedido.estado.name() == 'PENDIENTE' or pedido.estado.name() == 'CONFIRMADO'}"
+          th:action="@{/admin/pedidos/{id}/estado(id=${pedido.id})}" method="post"
+          onsubmit="return confirm('¿Cancelar el pedido? Las prendas vuelven al stock.');">
+        <input type="hidden" name="nuevo" value="CANCELADO">
+        <button type="submit">Cancelar pedido (devuelve el stock)</button>
+    </form>
+</div>
 
 <div class="tabla">
     <table>

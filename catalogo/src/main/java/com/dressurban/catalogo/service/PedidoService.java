@@ -5,6 +5,8 @@ import com.dressurban.catalogo.repository.PedidoRepository;
 import com.dressurban.catalogo.repository.VarianteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Comparator;
+import java.util.List;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -95,7 +97,65 @@ public class PedidoService {
         return p;
     }
 
+    @Transactional
+    public void cambiarEstado(Long pedidoId, EstadoPedido nuevo, String usuario) {
+        Pedido p = pedidos.findById(pedidoId)
+                .orElseThrow(() -> new IllegalArgumentException("El pedido no existe"));
+        EstadoPedido actual = p.getEstado();
+
+        if (!transicionValida(actual, nuevo)) {
+            throw new IllegalArgumentException(
+                    "No se puede pasar un pedido de " + actual + " a " + nuevo);
+        }
+        if (pedidos.cambiarEstado(pedidoId, actual, nuevo) == 0) {
+            throw new IllegalArgumentException(
+                    "El pedido cambió mientras lo mirabas. Recargá la página.");
+        }
+
+        if (nuevo == EstadoPedido.CANCELADO) {
+            // Siempre en el mismo orden (por id) para no trabarse con otros pedidos
+            List<PedidoItem> items = p.getItems().stream()
+                    .sorted(Comparator.comparing(i -> i.getVariante().getId()))
+                    .toList();
+            for (PedidoItem i : items) {
+                stock.devolverPorCancelacion(i.getVariante().getId(), i.getCantidad(),
+                        pedidoId, usuario);
+            }
+        }
+    }
+
+    private static boolean transicionValida(EstadoPedido de, EstadoPedido a) {
+        return switch (de) {
+            case PENDIENTE -> a == EstadoPedido.CONFIRMADO || a == EstadoPedido.CANCELADO;
+            case CONFIRMADO -> a == EstadoPedido.ENTREGADO || a == EstadoPedido.CANCELADO;
+            case ENTREGADO, CANCELADO -> false;
+        };
+    }
+
     private String limpiar(String s) {
         return s == null ? "" : s.trim();
+    }
+
+    /**
+     * Cancela el pedido SOLO si sigue pendiente (la condición va dentro del UPDATE).
+     * Devuelve true si lo canceló y devolvió el stock.
+     */
+    @Transactional
+    public boolean cancelarSiSigueSinConfirmar(Long pedidoId, String usuario) {
+        Pedido p = pedidos.findById(pedidoId).orElse(null);
+        if (p == null) {
+            return false;
+        }
+        if (pedidos.cambiarEstado(pedidoId, EstadoPedido.PENDIENTE, EstadoPedido.CANCELADO) == 0) {
+            return false; // alguien lo confirmó o cancelaron antes: no se toca
+        }
+        List<PedidoItem> items = p.getItems().stream()
+                .sorted(Comparator.comparing(i -> i.getVariante().getId()))
+                .toList();
+        for (PedidoItem i : items) {
+            stock.devolverPorCancelacion(i.getVariante().getId(), i.getCantidad(),
+                    pedidoId, usuario);
+        }
+        return true;
     }
 }

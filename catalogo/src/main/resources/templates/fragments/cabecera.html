@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<header th:fragment="cabecera" class="cabecera">
+    <a th:href="@{/}">Catálogo</a>
+    <a th:if="${modulos.tienda}" th:href="@{/carrito}">Carrito (<span th:text="${carritoCantidad}">0</span>)</a>
+</header>
+</body>
+</html>

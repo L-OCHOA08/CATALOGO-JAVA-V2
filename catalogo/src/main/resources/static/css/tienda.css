@@ -1,0 +1,23 @@
+body { font-family: system-ui, sans-serif; margin: 0 auto; padding: 0 1rem 2rem; max-width: 960px; }
+.cabecera { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #eee; margin-bottom: 1rem; }
+.cabecera a { text-decoration: none; color: inherit; font-weight: 600; }
+nav a { margin-right: .75rem; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.card { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+.card img { width: 100%; height: 160px; object-fit: cover; border-radius: 6px; }
+.detalle { max-width: 520px; }
+.detalle img { width: 100%; border-radius: 6px; }
+.precio { font-weight: bold; }
+.agotado { color: #b00020; font-weight: bold; }
+.btn { display: inline-block; padding: .6rem 1.2rem; background: #111; color: #fff; border: 0; border-radius: 6px; text-decoration: none; cursor: pointer; font-size: 1rem; }
+.btn.sec { background: #fff; color: #111; border: 1px solid #111; }
+.ok { background: #e6f4ea; padding: .5rem 1rem; border-radius: 6px; }
+.error { background: #fdecea; color: #b00020; padding: .5rem 1rem; border-radius: 6px; }
+.tabla { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; }
+th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; vertical-align: middle; }
+label { display: block; margin-top: 1rem; font-weight: 600; }
+input, select, textarea { width: 100%; padding: .5rem; box-sizing: border-box; }
+td input[type=number] { width: 70px; }
+form.inline { display: inline; }
+.total { font-size: 1.3rem; font-weight: bold; text-align: right; margin-top: 1rem; }

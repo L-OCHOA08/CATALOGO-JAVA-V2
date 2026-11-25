@@ -8,12 +8,29 @@
 <body>
 <h1>Panel de administración</h1>
 <p th:text="'Sesión iniciada como ' + ${usuario}">Sesión iniciada</p>
-<p><a th:href="@{/admin/categorias}">Gestionar categorías</a></p>
+<p><small>Plan: <strong th:text="${modulos.plan}">TIENDA</strong></small></p>
+
+<p th:if="${modulos.stock and stockBajo > 0}" style="background:#fff4e5;padding:.5rem 1rem;border-radius:6px">
+    Atención: hay <strong th:text="${stockBajo}">0</strong> prendas con stock bajo o agotadas.
+    <a th:href="@{/admin/stock-bajo}">Verlas</a>
+</p>
+
 <p><a th:href="@{/admin/productos}">Gestionar productos</a></p>
-<p><a th:href="@{/}">Ver catálogo público</a></p>
-<p><a th:href="@{/admin/pedidos/nuevo}">Cargar pedido</a></p>
+<p><a th:href="@{/admin/categorias}">Gestionar categorías</a></p>
+
+<th:block th:if="${modulos.stock}">
+    <p><a th:href="@{/admin/pedidos}">Pedidos</a>
+        <strong th:if="${pendientes > 0}" th:text="'(' + ${pendientes} + ' pendientes)'"></strong></p>
+    <p><a th:href="@{/admin/pedidos/nuevo}">Cargar pedido</a></p>
+    <p><a th:href="@{/admin/stock-bajo}">Stock bajo</a>
+        <strong th:if="${stockBajo > 0}" th:text="'(' + ${stockBajo} + ')'"></strong></p>
+</th:block>
+
+<p th:if="${modulos.reportes}"><a th:href="@{/admin/reportes/ventas}">Reporte de ventas</a></p>
+
 <form th:action="@{/logout}" method="post">
     <button type="submit">Cerrar sesión</button>
 </form>
+<p><a th:href="@{/}">Ver catálogo público</a></p>
 </body>
 </html>

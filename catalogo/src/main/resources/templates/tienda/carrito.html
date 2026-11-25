@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Carrito</title>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
+<body>
+<div th:replace="~{fragments/cabecera :: cabecera}"></div>
+<h1>Tu carrito</h1>
+<p class="ok" th:if="${mensaje}" th:text="${mensaje}"></p>
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<p th:if="${vista.lineas.empty}">Tu carrito está vacío. <a th:href="@{/}">Ver el catálogo</a></p>
+
+<div class="tabla" th:unless="${vista.lineas.empty}">
+    <table>
+        <thead><tr><th>Prenda</th><th>Cantidad</th><th>Subtotal</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="l : ${vista.lineas}">
+            <td>
+                <strong th:text="${l.nombre}">Producto</strong><br>
+                talle <span th:text="${l.talle}">M</span>
+                <span th:unless="${l.color.isBlank()}" th:text="'· ' + ${l.color}"></span><br>
+                <span class="agotado" th:if="${!l.disponible}">Ya no está disponible</span>
+                <span class="agotado" th:if="${l.disponible and l.cantidad > l.stock}"
+                      th:text="'Solo quedan ' + ${l.stock}">Sin stock</span>
+            </td>
+            <td>
+                <form class="inline" th:action="@{/carrito/actualizar}" method="post">
+                    <input type="hidden" name="varianteId" th:value="${l.varianteId}">
+                    <input type="number" name="cantidad" min="0" max="10" th:value="${l.cantidad}">
+                    <button type="submit">OK</button>
+                </form>
+            </td>
+            <td th:text="'$ ' + ${#numbers.formatDecimal(l.subtotal, 1, 'POINT', 2, 'COMMA')}">$ 0</td>
+            <td>
+                <form class="inline" th:action="@{/carrito/quitar}" method="post">
+                    <input type="hidden" name="varianteId" th:value="${l.varianteId}">
+                    <button type="submit">Quitar</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="total" th:text="'Total: $ ' + ${#numbers.formatDecimal(vista.total, 1, 'POINT', 2, 'COMMA')}">Total</p>
+    <p><a class="btn" th:href="@{/checkout}" th:unless="${vista.hayProblemas}">Finalizar compra</a>
+        <a class="btn sec" th:href="@{/}">Seguir comprando</a></p>
+</div>
+</body>
+</html>

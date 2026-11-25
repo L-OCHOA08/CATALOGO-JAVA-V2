@@ -25,19 +25,19 @@
 <div class="tabla">
     <table>
         <thead>
-        <tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr>
+        <tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th th:if="${modulos.stock}">Stock</th><th>Estado</th><th>Acciones</th></tr>
         </thead>
         <tbody>
         <tr th:each="p : ${productos}" th:classappend="${!p.activo} ? 'inactivo'">
             <td th:text="${p.nombre}">Nombre</td>
             <td th:text="${p.categoria.nombre}">Categoría</td>
             <td th:text="'$ ' + ${#numbers.formatDecimal(p.precio, 1, 'POINT', 2, 'COMMA')}">$ 0</td>
-            <td th:text="${stockPorProducto[p.id] ?: 0}"
+            <td th:if="${modulos.stock}" th:text="${stockPorProducto[p.id] ?: 0}"
                 th:classappend="${(stockPorProducto[p.id] ?: 0) == 0} ? 'agotado'">0</td>
             <td th:text="${p.activo} ? 'Visible' : 'Oculto'">Estado</td>
             <td>
                 <a th:href="@{/admin/productos/{id}/editar(id=${p.id})}">Editar</a>
-                <a th:href="@{/admin/productos/{id}/variantes(id=${p.id})}">Variantes</a>
+                <a th:if="${modulos.stock}" th:href="@{/admin/productos/{id}/variantes(id=${p.id})}">Variantes</a>
                 <form class="inline" th:action="@{/admin/productos/{id}/activar(id=${p.id})}" method="post">
                     <button type="submit" th:text="${p.activo} ? 'Ocultar' : 'Mostrar'">Ocultar</button>
                 </form>

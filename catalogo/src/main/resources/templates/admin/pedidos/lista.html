@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pedidos</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 1rem; max-width: 960px; margin-inline: auto; }
+        .tabs a { display: inline-block; margin: 0 .5rem .5rem 0; padding: .3rem .8rem; border: 1px solid #ccc; border-radius: 999px; text-decoration: none; color: inherit; }
+        .tabs a.activo { background: #111; color: #fff; border-color: #111; }
+        .tabla { overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; white-space: nowrap; }
+        .estado-PENDIENTE { color: #b06000; font-weight: bold; }
+        .estado-CONFIRMADO { color: #1a56c4; font-weight: bold; }
+        .estado-ENTREGADO { color: #137333; font-weight: bold; }
+        .estado-CANCELADO { color: #888; text-decoration: line-through; }
+        .pag { margin-top: 1rem; }
+    </style>
+</head>
+<body>
+<h1>Pedidos</h1>
+<p><a th:href="@{/admin}">← Panel</a> · <a th:href="@{/admin/pedidos/nuevo}">+ Cargar pedido</a></p>
+
+<div class="tabs">
+    <a th:href="@{/admin/pedidos}" th:classappend="${filtro == ''} ? 'activo'">Todos</a>
+    <a th:each="c : ${conteos}" th:href="@{/admin/pedidos(estado=${c.key})}"
+       th:classappend="${filtro == c.key} ? 'activo'"
+       th:text="${c.key + ' (' + c.value + ')'}">PENDIENTE (0)</a>
+</div>
+
+<p th:if="${pagina.empty}">No hay pedidos para mostrar.</p>
+
+<div class="tabla" th:unless="${pagina.empty}">
+    <table>
+        <thead><tr><th>#</th><th>Fecha</th><th>Cliente</th><th>Teléfono</th><th>Total</th><th>Estado</th><th>Origen</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="p : ${pagina.content}">
+            <td th:text="${p.id}">1</td>
+            <td th:text="${#temporals.format(p.fecha, 'dd/MM/yyyy HH:mm')}">fecha</td>
+            <td th:text="${p.clienteNombre}">cliente</td>
+            <td th:text="${p.clienteTelefono}">tel</td>
+            <td th:text="'$ ' + ${#numbers.formatDecimal(p.total, 1, 'POINT', 2, 'COMMA')}">$ 0</td>
+            <td th:text="${p.estado}" th:classappend="'estado-' + ${p.estado}">estado</td>
+            <td th:text="${p.origen}">origen</td>
+            <td><a th:href="@{/admin/pedidos/{id}(id=${p.id})}">Ver</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<p class="pag">
+    <a th:if="${pagina.hasPrevious()}" th:href="@{/admin/pedidos(estado=${filtro}, pagina=${pagina.number - 1})}">← Anterior</a>
+    <span th:text="'Página ' + ${pagina.number + 1} + ' de ' + ${pagina.totalPages == 0 ? 1 : pagina.totalPages}">Página 1</span>
+    <a th:if="${pagina.hasNext()}" th:href="@{/admin/pedidos(estado=${filtro}, pagina=${pagina.number + 1})}">Siguiente →</a>
+</p>
+</body>
+</html>

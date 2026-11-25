@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Finalizar compra</title>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
+<body>
+<div th:replace="~{fragments/cabecera :: cabecera}"></div>
+<h1>Finalizar compra</h1>
+<p class="error" th:if="${error}" th:text="${error}"></p>
+
+<ul>
+    <li th:each="l : ${vista.lineas}"
+        th:text="${l.cantidad + ' x ' + l.nombre + ' (talle ' + l.talle + (l.color.isBlank() ? '' : ', ' + l.color) + ')'}">Prenda</li>
+</ul>
+<p class="total" th:text="'Total: $ ' + ${#numbers.formatDecimal(vista.total, 1, 'POINT', 2, 'COMMA')}">Total</p>
+
+<form th:action="@{/checkout}" method="post">
+    <label for="clienteNombre">Nombre y apellido</label>
+    <input type="text" id="clienteNombre" name="clienteNombre" th:value="${clienteNombre}" maxlength="120" required>
+
+    <label for="clienteTelefono">Teléfono / WhatsApp</label>
+    <input type="text" id="clienteTelefono" name="clienteTelefono" th:value="${clienteTelefono}" maxlength="40" required>
+
+    <label for="clienteEmail">Email (opcional)</label>
+    <input type="text" id="clienteEmail" name="clienteEmail" th:value="${clienteEmail}" maxlength="120">
+
+    <label for="nota">Comentarios (opcional)</label>
+    <textarea id="nota" name="nota" rows="2" maxlength="500" th:text="${nota}"></textarea>
+
+    <p>Al confirmar, tus prendas quedan reservadas. El negocio se va a comunicar con vos para coordinar el pago y la entrega.</p>
+    <p th:if="${vencimientoHoras > 0}"
+       th:text="'La reserva dura ' + ${vencimientoHoras} + ' horas. Si en ese plazo el negocio no confirma el pedido, se cancela y las prendas vuelven a estar disponibles.'"></p>
+    <p><button class="btn" type="submit">Confirmar pedido</button>
+        <a th:href="@{/carrito}">Volver al carrito</a></p>
+</form>
+</body>
+</html>

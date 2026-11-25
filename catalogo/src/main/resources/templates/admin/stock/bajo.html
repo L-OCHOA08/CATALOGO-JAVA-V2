@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stock bajo</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; padding: 1rem; max-width: 800px; margin-inline: auto; }
+        .tabla { overflow-x: auto; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border-bottom: 1px solid #ddd; padding: .5rem; text-align: left; white-space: nowrap; }
+        .agotado { color: #b00020; font-weight: bold; }
+        .bajo { color: #b06000; font-weight: bold; }
+    </style>
+</head>
+<body>
+<h1>Stock bajo</h1>
+<p><a th:href="@{/admin}">← Panel</a></p>
+<p>Prendas activas con <strong th:text="${umbral}">3</strong> unidades o menos.</p>
+
+<p th:if="${variantes.empty}">No hay prendas con stock bajo. Todo en orden.</p>
+
+<div class="tabla" th:unless="${variantes.empty}">
+    <table>
+        <thead><tr><th>Producto</th><th>Talle</th><th>Color</th><th>Stock</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="v : ${variantes}">
+            <td th:text="${v.producto.nombre}">Producto</td>
+            <td th:text="${v.talle}">M</td>
+            <td th:text="${v.color.isBlank()} ? '—' : ${v.color}">Negro</td>
+            <td><strong th:text="${v.stock}">0</strong></td>
+            <td th:if="${v.stock == 0}" class="agotado">AGOTADO</td>
+            <td th:unless="${v.stock == 0}" class="bajo">BAJO</td>
+            <td><a th:href="@{/admin/variantes/{id}(id=${v.id})}">Reponer / ajustar</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

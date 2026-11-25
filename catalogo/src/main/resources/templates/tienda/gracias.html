@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Pedido recibido</title>
+    <link rel="stylesheet" th:href="@{/css/tienda.css}">
+</head>
+<body>
+<div th:replace="~{fragments/cabecera :: cabecera}"></div>
+<h1>¡Gracias, <span th:text="${pedido.clienteNombre}">cliente</span>!</h1>
+<p class="ok" th:text="'Tu pedido #' + ${pedido.id} + ' fue registrado y tus prendas quedaron reservadas.'">Pedido</p>
+
+<ul>
+    <li th:each="i : ${pedido.items}"
+        th:text="${i.cantidad + ' x ' + i.productoNombre + ' (talle ' + i.talle + (i.color.isBlank() ? '' : ', ' + i.color) + ')'}">Prenda</li>
+</ul>
+<p class="total" th:text="'Total: $ ' + ${#numbers.formatDecimal(pedido.total, 1, 'POINT', 2, 'COMMA')}">Total</p>
+
+<p th:if="${vencimientoHoras > 0}"
+   th:text="'Tu reserva está vigente por ' + ${vencimientoHoras} + ' horas. Escribinos por WhatsApp para confirmarla.'"></p>
+
+<p th:if="${whatsappUrl}">
+    <a class="btn" th:href="${whatsappUrl}" target="_blank" rel="noopener">Enviar mi pedido por WhatsApp</a>
+</p>
+<p><a th:href="@{/}">Volver al catálogo</a></p>
+</body>
+</html>
